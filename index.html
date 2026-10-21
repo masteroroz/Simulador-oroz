@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚽ Simulador — Champions League</title>
+    <style>
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        body { max-width: 520px; margin: 0 auto; padding: 15px; background: #f5f5f7; }
+        h1 { text-align: center; color: #1d1d1f; font-size: 22px; margin-bottom: 20px; }
+        h2 { font-size: 16px; margin: 16px 0 8px; color: #333; }
+        .card { background: white; padding: 18px; border-radius: 14px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+        .local { border-left: 4px solid #3b82f6; }
+        .visitante { border-left: 4px solid #ef4444; }
+        .ajustes { border-left: 4px solid #10b981; }
+        .parley { border-left: 4px solid #f59e0b; background: #fffbeb; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .campo { display: flex; flex-direction: column; margin-bottom: 10px; }
+        label { font-size: 12.5px; color: #555; margin-bottom: 4px; font-weight: 500; }
+        input, select { padding: 9px 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; background: white; }
+        input:focus, select:focus { outline: none; border-color: #3b82f6; }
+        button { width: 100%; padding: 13px; background: linear-gradient(135deg, #1e40af, #3b82f6); color: white; font-size: 16px; font-weight: 600; border: none; border-radius: 10px; cursor: pointer; margin-top: 6px; }
+        button.secundario { background: #e5e7eb; color: #374151; margin-top: 8px; }
+        .resultado { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 16px; border-radius: 10px; margin-top: 16px; display: none; }
+        .resultado.activo { display: block; }
+        .fila { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #dcfce7; font-size: 14px; }
+        .fila:last-child { border-bottom: none; }
+        .valor { font-weight: 600; color: #166534; }
+        .recomendacion { padding: 10px 12px; border-radius: 8px; margin-top: 6px; font-weight: 500; font-size: 14px; }
+        .mas { background: #dcfce7; color: #166534; border-left: 3px solid #22c55e; }
+        .menos { background: #fee2e2; color: #991b1b; border-left: 3px solid #ef4444; }
+        .etiqueta { font-size: 10.5px; background: #3b82f6; color: white; padding: 1px 6px; border-radius: 10px; margin-left: 6px; }
+        .etiqueta-seguro { background: #10b981; }
+        .etiqueta-ambos { background: #ec4899; }
+        .justificacion { font-size: 11.5px; color: #666; margin-top: 4px; line-height: 1.4; }
+        .subtitulo { font-size: 14px; font-weight: 600; color: #92400e; margin: 16px 0 6px; padding-bottom: 4px; border-bottom: 1px dashed #fcd34d; }
+        .info-ajuste { font-size: 11.5px; background: #eff6ff; border-left: 3px solid #3b82f6; padding: 8px; border-radius: 6px; margin-top: 8px; color: #1e40af; }
+        .info-mezcla { font-size: 11px; color: #6b7280; margin-top: 4px; font-style: italic; }
+    </style>
+</head>
+<body>
+
+    <h1>⚽ Simulador — Champions League</h1>
+
+    <!-- EQUIPO LOCAL -->
+    <div class="card local">
+        <h2>🏠 Equipo Local</h2>
+        <div class="campo">
+            <label>Nombre del equipo</label>
+            <input type="text" id="nombreLocal" placeholder="Ej: Arsenal">
+        </div>
+        <div class="campo">
+            <label>¿De qué liga es? ⭐</label>
+            <select id="ligaLocal">
+                <option value='{"peso":1.15,"corners":10.5,"tarjetas":4.0}'>🏴 Premier League</option>
+                <option value='{"peso":1.08,"corners":9.8,"tarjetas":5.1}'>🇪🇸 La Liga</option>
+                <option value='{"peso":1.07,"corners":10.2,"tarjetas":4.4}'>🇩🇪 Bundesliga</option>
+                <option value='{"peso":1.05,"corners":9.2,"tarjetas":5.0}'>🇮🇹 Serie A</option>
+                <option value='{"peso":0.95,"corners":9.4,"tarjetas":4.7}'>🇫🇷 Ligue 1</option>
+                <option value='{"peso":0.88,"corners":10.1,"tarjetas":5.6}'>🇵🇹 Primeira Liga</option>
+                <option value='{"peso":0.82,"corners":11.2,"tarjetas":4.8}' selected>🇳🇱 Eredivisie</option>
+                <option value='{"peso":0.85,"corners":10.4,"tarjetas":5.2}'>🇹🇷 Superliga de Turquía</option>
+                <option value='{"peso":0.83,"corners":10.8,"tarjetas":5.3}'>🇨🇭 Superliga de Suiza</option>
+                <option value='{"peso":0.80,"corners":9.6,"tarjetas":5.5}'>🇷🇺 Premier Rusa</option>
+                <option value='{"peso":0.80,"corners":10.0,"tarjetas":4.2}'>🇸🇦 Saudi Pro League</option>
+                <option value='{"peso":0.78,"corners":9.7,"tarjetas":5.4}'>🇦🇹 Bundesliga de Austria</option>
+                <option value='{"peso":0.78,"corners":9.5,"tarjetas":5.0}'>🇰🇷 Liga de Corea del Sur</option>
+                <option value='{"peso":0.77,"corners":9.4,"tarjetas":5.8}'>🇬🇷 Superliga de Grecia</option>
+                <option value='{"peso":0.76,"corners":10.3,"tarjetas":4.9}'>🇩🇰 Superliga de Dinamarca</option>
+                <option value='{"peso":0.75,"corners":9.2,"tarjetas":5.7}'>🇨🇿 Liga Checa</option>
+                <option value='{"peso":0.74,"corners":9.1,"tarjetas":5.6}'>🇭🇺 Liga Húngara</option>
+                <option value='{"peso":0.73,"corners":9.5,"tarjetas":5.5}'>🇷🇴 Liga 1 de Rumanía</option>
+                <option value='{"peso":0.72,"corners":10.0,"tarjetas":5.2}'>🇸🇪 Allsvenskan (Suecia)</option>
+                <option value='{"peso":0.72,"corners":9.8,"tarjetas":5.1}'>🇳🇴 Eliteserien (Noruega)</option>
+                <option value='{"peso":0.71,"corners":9.3,"tarjetas":5.4}'>🇮🇱 Liga de Israel</option>
+                <option value='{"peso":0.70,"corners":9.0,"tarjetas":5.5}'>🇸🇮 Liga de Eslovenia</option>
+                <option value='{"peso":1.00,"corners":9.7,"tarjetas":5.2}'>🏆 Champions League / Neutral</option>
+            </select>
+        </div>
+        <div class="grid">
+            <div class="campo">
+                <label>Goles a favor / partido</label>
+                <input type="number" step="0.01" id="ataqueLocal" required>
+            </div>
+            <div class="campo">
+                <label>Goles en contra / partido</label>
+                <input type="number" step="0.01" id="defensaLocal" required>
+            </div>
+            <div class="campo">
+                <label>Córners / partido <small style="color:#888">(0=usar promedio liga)</small></label>
+                <input type="number" step="0.1" id="cornersLocal" value="0">
+            </div>
+            <div class="campo">
+                <label>Tarjetas / partido <small style="color:#888">(0=usar promedio liga)</small></label>
+                <input type="number" step="0.1" id="tarjetasLocal" value="0">
+            </div>
+            <div class="campo" style="grid-column: span 2;">
+                <label>Faltas / partido</label>
+                <input type="number" step="0.1" id="faltasLocal" value="0">
+            </div>
+        </div>
+    </div>
+
+    <!-- EQUIPO VISITANTE -->
+    <div class="card visitante">
+        <h2>✈️ Equipo Visitante</h2>
+        <div class="campo">
+            <label>Nombre del equipo</label>
+            <input type="text" id="nombreVisita" placeholder="Ej: Arsenal">
+        </div>
+        <div class="campo">
+            <label>¿De qué liga es? ⭐</label>
+            <select id="ligaVisita">
+                <option value='{"peso":1.15,"corners":10.5,"tarjetas":4.0}' selected>🏴 Premier League</option>
+                <option value='{"peso":1.08,"corners":9.8,"tarjetas":5.1}'>🇪🇸 La Liga</option>
+                <option value='{"peso":1.07,"corners":10.2,"tarjetas":4.4}'>🇩🇪 Bundesliga</option>
+                <option value='{"peso":1.05,"corners":9.2,"tarjetas":5.0}'>🇮🇹 Serie A</option>
+                <option value='{"peso":0.95,"corners":9.4,"tarjetas":4.7}'>🇫🇷 Ligue 1</option>
+                <option value='{"peso":0.88,"corners":10.1,"tarjetas":5.6}'>🇵🇹 Primeira Liga</option>
+                <option value='{"peso":0.82,"corners":11.2,"tarjetas":4.8}'>🇳🇱 Eredivisie</option>
+                <option value='{"peso":0.85,"corners":10.4,"tarjetas":5.2}'>🇹🇷 Superliga de Turquía</option>
+                <option value='{"peso":0.83,"corners":10.8,"tarjetas":5.3}'>🇨🇭 Superliga de Suiza</option>
+                <option value='{"peso":0.80,"corners":9.6,"tarjetas":5.5}'>🇷🇺 Premier Rusa</option>
+                <option value='{"peso":0.80,"corners":10.0,"tarjetas":4.2}'>🇸🇦 Saudi Pro League</option>
+                <option value='{"peso":0.78,"corners":9.7,"tarjetas":5.4}'>🇦🇹 Bundesliga de Austria</option>
+                <option value='{"peso":0.78,"corners":9.5,"tarjetas":5.0}'>🇰🇷 Liga de Corea del Sur</option>
+                <option value='{"peso":0.77,"corners":9.4,"tarjetas":5.8}'>🇬🇷 Superliga de Grecia</option>
+                <option value='{"peso":0.76,"corners":10.3,"tarjetas":4.9}'>🇩🇰 Superliga de Dinamarca</option>
+                <option value='{"peso":0.75,"corners":9.2,"tarjetas":5.7}'>🇨🇿 Liga Checa</option>
+                <option value='{"peso":0.74,"corners":9.1,"tarjetas":5.6}'>🇭🇺 Liga Húngara</option>
+                <option value='{"peso":0.73,"corners":9.5,"tarjetas":5.5}'>🇷🇴 Liga 1 de Rumanía</option>
+                <option value='{"peso":0.72,"corners":10.0,"tarjetas":5.2}'>🇸🇪 Allsvenskan (Suecia)</option>
+                <option value='{"peso":0.72,"corners":9.8,"tarjetas":5.1}'>🇳🇴 Eliteserien (Noruega)</option>
+                <option value='{"peso":0.71,"corners":9.3,"tarjetas":5.4}'>🇮🇱 Liga de Israel</option>
+                <option value='{"peso":0.70,"corners":9.0,"tarjetas":5.5}'>🇸🇮 Liga de Eslovenia</option>
+                <option value='{"peso":1.00,"corners":9.7,"tarjetas":5.2}'>🏆 Champions League / Neutral</option>
+            </select>
+        </div>
+        <div class="grid">
+            <div class="campo">
+                <label>Goles a favor / partido</label>
+                <input type="number" step="0.01" id="ataqueVisita" required>
+            </div>
+            <div class="campo">
+                <label>Goles en contra / partido</label>
+                <input type="number" step="0.01" id="defensaVisita" required>
+            </div>
+            <div class="campo">
+                <label>Córners / partido <small style="color:#888">(0=usar promedio liga)</small></label>
+                <input type="number" step="0.1" id="cornersVisita" value="0">
+            </div>
+            <div class="campo">
+                <label>Tarjetas / partido <small style="color:#888">(0=usar promedio liga)</small></label>
+                <input type="number" step="0.1" id="tarjetasVisita" value="0">
+            </div>
+            <div class="campo" style="grid-column: span 2;">
+                <label>Faltas / partido</label>
+                <input type="number" step="0.1" id="faltasVisita" value="0">
+            </div>
+        </div>
+    </div>
+
+    <!-- AJUSTES GENERALES -->
+    <div class="card ajustes">
+        <h2>⚙️ Estilo del Partido</h2>
+        <div class="campo">
+            <select id="estiloPartido">
+                <option value="1.00">⚽ Normal — Equilibrio habitual</option>
+                <option value="1.10">🔥 Abierto — Más espacio, más ataque</option>
+                <option value="0.90">🛡️ Cerrado — Más precaución, menos goles</option>
+                <option value="1.15">⚡ Muy abierto — Ambos al ataque</option>
+                <option value="0.85">🧱 Muy cerrado — Defensa primero</option>
+            </select>
+        </div>
+    </div>
+
+    <button onclick="calcular()">🔮 Calcular Simulación</button>
+    <button class="secundario" onclick="limpiar()">🔄 Limpiar Todo</button>
+
+    <!-- RESULTADOS -->
+    <div class="resultado" id="cajaResultado">
+        <h2 style="margin-top:0; color:#166534;">📊 Resultados del Partido</h2>
+        
+        <div class="info-ajuste">
+            ⚖️ Ajuste de liga aplicado — Los datos del equipo tienen prioridad; si faltan, se usa el promedio de su liga.
+        </div>
+
+        <div class="fila">
+            <span>Goles esperados — <span id="nLocal">Local</span></span>
+            <span class="valor" id="golesLocal">0.00</span>
+        </div>
+        <div class="fila">
+            <span>Goles esperados — <span id="nVisita">Visitante</span></span>
+            <span class="valor" id="golesVisita">0.00</span>
+        </div>
+        <div class="fila">
+            <span>Total de goles esperados</span>
+            <span class="valor" id="totalGoles">0.00</span>
+        </div>
+        <div class="fila">
+            <span>Córners totales esperados</span>
+            <span class="valor" id="totalCorners">0.0</span>
+        </div>
+        <div class="fila">
+            <span>Tarjetas totales esperadas</span>
+            <span class="valor" id="totalTarjetas">0.0</span>
+        </div>
+        <div class="fila">
+            <span>Faltas totales esperadas</span>
+            <span class="valor" id="totalFaltas">0.0</span>
+        </div>
+        <div class="info-mezcla" id="textoMezcla"></div>
+
+        <!-- PARLEY -->
+        <div class="subtitulo">🔥 PARLEY</div>
+        
+        <div style="font-size:13px; font-weight:600; margin-top:12px; color:#78350f;">⚽ Goles por Equipo</div>
+        <div id="recGolesLocal"></div>
+        <div id="recGolesVisita"></div>
+
+        <div style="font-size:13px; font-weight:600; margin-top:12px; color:#78350f;">🎯 Ambos Equipos Anotan</div>
+        <div id="recAmbos"></div>
+
+        <div style="font-size:13px; font-weight:600; margin-top:12px; color:#78350f;">⚽ Total de Goles</div>
+        <div id="recTotal1"></div>
+        <div id="recTotal2"></div>
+
+        <div style="font-size:13px; font-weight:600; margin-top:12px; color:#78350f;">📐 Córners</div>
+        <div id="recCorners1"></div>
+        <div id="recCorners2"></div>
+
+        <div style="font-size:13px; font-weight:600; margin-top:12px; color:#78350f;">🟨 Tarjetas</div>
+        <div id="recTarjetas1"></div>
+        <div id="recTarjetas2"></div>
+
+        <div style="font-size:13px; font-weight:600; margin-top:12px; color:#78350f;">⚠️ Faltas</div>
+        <div id="recFaltas1"></div>
+        <div id="recFaltas2"></div>
+    </div>
+
+<script>
+// Umbrales de análisis
+const UMB_ATAQUE_BUENO = 1.4;
+const UMB_ATAQUE_DEBIL = 1.0;
+const UMB_DEFENSA_BUENA = 1.2;
+const UMB_DEFENSA_MALA = 1.6;
+
+function limpiar() {
+    location.reload();
+}
+
+function parsearLiga(selector) {
+    return JSON.parse(selector.options[selector.selectedIndex].value);
+}
+
+function calcular() {
+    // LEER DATOS
+    const nombreLocal = document.getElementById('nombreLocal').value || 'Local';
+    const nombreVisita = document.getElementById('nombreVisita').value || 'Visitante';
+    
+    const ligaLocal = parsearLiga(document.getElementById('ligaLocal'));
+    const ligaVisita = parsearLiga(document.getElementById('ligaVisita'));
+    
+    const pesoLigaLocal = ligaLocal.peso;
+    const pesoLigaVisita = ligaVisita.peso;
+    const cornersLigaLocal = ligaLocal.corners;
+    const cornersLigaVisita = ligaVisita.corners;
+    const tarjetasLigaLocal = ligaLocal.tarjetas;
+    const tarjetasLigaVisita = ligaVisita.tarjetas;
+    
+    const aL = parseFloat(document.getElementById('ataqueLocal').value);
+    const dL = parseFloat(document.getElementById('defensaLocal').value);
+    const aV = parseFloat(document.getElementById('ataqueVisita').value);
+    const dV = parseFloat(document.getElementById('defensaVisita').value);
+    
+    const cL = parseFloat(document.getElementById('cornersLocal').value) || 0;
+    const cV = parseFloat(document.getElementById('cornersVisita').value) || 0;
+    const tL = parseFloat(document.getElementById('tarjetasLocal').value) || 0;
+    const tV = parseFloat(document.getElementById('tarjetasVisita').value) || 0;
+    const fL = parseFloat(document.getElementById('faltasLocal').value) || 0;
+    const fV = parseFloat(document.getElementById('faltasVisita').value) || 0;
+    
+    const estilo = parseFloat(document.getElementById('estiloPartido').value);
+
+    // ==========================================
+    // CÁLCULO DE GOLES CON AJUSTE DE LIGA
+    // ==========================================
+    const ataqueAjustadoLocal = aL * pesoLigaVisita;
+    const defensaAjustadaVisita = dV * pesoLigaLocal;
+    const golesLocal = ((ataqueAjustadoLocal + defensaAjustadaVisita) / 2) * estilo;
+
+    const ataqueAjustadoVisita = aV * pesoLigaLocal;
+    const defensaAjustadaLocal = dL * pesoLigaVisita;
+    const golesVisita = ((ataqueAjustadoVisita + defensaAjustadaLocal) / 2) * estilo;
+
+    const totalGoles = golesLocal + golesVisita;
+
+    // ==========================================
+    // CÁLCULO DE CÓRNERS — REGLA: DATO EQUIPO > PROMEDIO LIGA
+    // ==========================================
+    const datoCornersLocal = cL > 0 ? cL : cornersLigaLocal;
+    const datoCornersVisita = cV > 0 ? cV : cornersLigaVisita;
+    const origenCornersLocal = cL > 0 ? `dato real: ${cL}` : `promedio liga: ${cornersLigaLocal}`;
+    const origenCornersVisita = cV > 0 ? `dato real: ${cV}` : `promedio liga: ${cornersLigaVisita}`;
+    const promedioCornersPartido = (cornersLigaLocal + cornersLigaVisita) / 2;
+    const totalCorners = (datoCornersLocal * 0.55 + datoCornersVisita * 0.45) * 0.90 + promedioCornersPartido * 0.10;
+
+    // ==========================================
+    // CÁLCULO DE TARJETAS — REGLA: DATO EQUIPO > PROMEDIO LIGA
+    // ==========================================
+    const datoTarjetasLocal = tL > 0 ? tL : tarjetasLigaLocal;
+    const datoTarjetasVisita = tV > 0 ? tV : tarjetasLigaVisita;
+    const origenTarjetasLocal = tL > 0 ? `dato real: ${tL}` : `promedio liga: ${tarjetasLigaLocal}`;
+    const origenTarjetasVisita = tV > 0 ? `dato real: ${tV}` : `promedio liga: ${tarjetasLigaVisita}`;
+    const promedioTarjetasPartido = (tarjetasLigaLocal + tarjetasLigaVisita) / 2;
+    const totalTarjetas = (datoTarjetasLocal * 0.52 + datoTarjetasVisita * 0.48) * 0.90 + promedioTarjetasPartido * 0.10;
+
+    // FALTAS
+    const totalFaltas = fL > 0 && fV > 0
+        ? (fL * 0.5 + fV * 0.5)
+        : (10.5);
+
+    // MOSTRAR MEZCLA DE PROMEDIOS
+    document.getElementById('textoMezcla').innerHTML = 
+        `📐 Córners: ${nombreLocal} (${origenCornersLocal}) + ${nombreVisita} (${origenCornersVisita}) → base mezclada: ${promedioCornersPartido.toFixed(1)}<br>` +
+        `🟨 Tarjetas: ${nombreLocal} (${origenTarjetasLocal}) + ${nombreVisita} (${origenTarjetasVisita}) → base mezclada: ${promedioTarjetasPartido.toFixed(1)}`;
+
+    // MOSTRAR RESULTADOS
+    document.getElementById('nLocal').textContent = nombreLocal;
+    document.getElementById('nVisita').textContent = nombreVisita;
+    document.getElementById('golesLocal').textContent = golesLocal.toFixed(2);
+    document.getElementById('golesVisita').textContent = golesVisita.toFixed(2);
+    document.getElementById('totalGoles').textContent = totalGoles.toFixed(2);
+    document.getElementById('totalCorners').textContent = totalCorners.toFixed(1);
+    document.getElementById('totalTarjetas').textContent = totalTarjetas.toFixed(1);
+    document.getElementById('totalFaltas').textContent = totalFaltas.toFixed(1);
+
+    // ==========================================
+    // LÓGICA DE RECOMENDACIONES
+    // ==========================================
+
+    // GOLES LOCAL
+    const recGolesLocal = document.getElementById('recGolesLocal');
+    const lineaLocal = golesLocal >= 1.0 ? 1.5 : 0.5;
+    const dirLocal = golesLocal >= lineaLocal ? 'mas' : 'menos';
+    const justLocal = aL >= UMB_ATAQUE_BUENO && dV >= UMB_DEFENSA_MALA
+        ? `${nombreLocal} ataca bien (${aL}/partido) y visita defiende mal (${dV} encajados). Peso liga: Local ×${pesoLigaLocal.toFixed(2)} | Visita ×${pesoLigaVisita.toFixed(2)}`
+        : `Promedio ajustado: ${golesLocal.toFixed(2)} goles`;
+    
+    recGolesLocal.className = `recomendacion ${dirLocal === 'mas' ? 'mas' : 'menos'}`;
+    recGolesLocal.innerHTML = `🏠 ${nombreLocal}: <strong>${dirLocal === 'mas' ? 'MÁS' : 'MENOS'} de ${lineaLocal} goles</strong><span class="etiqueta">Principal</span>
+        <div class="justificacion">💡 ${justLocal}</div>`;
+
+    // GOLES VISITA
+    const recGolesVisita = document.getElementById('recGolesVisita');
+    const lineaVisita = golesVisita >= 1.0 ? 1.5 : 0.5;
+    const dirVisita = golesVisita >= lineaVisita ? 'mas' : 'menos';
+    const justVisita = aV >= UMB_ATAQUE_BUENO && dL >= UMB_DEFENSA_MALA
+        ? `${nombreVisita} ataca bien (${aV}/partido) y local defiende mal (${dL} encajados). Peso liga: Visita ×${pesoLigaVisita.toFixed(2)} | Local ×${pesoLigaLocal.toFixed(2)}`
+        : `Promedio ajustado: ${golesVisita.toFixed(2)} goles`;
+    
+    recGolesVisita.className = `recomendacion ${dirVisita === 'mas' ? 'mas' : 'menos'}`;
+    recGolesVisita.innerHTML = `✈️ ${nombreVisita}: <strong>${dirVisita === 'mas' ? 'MÁS' : 'MENOS'} de ${lineaVisita} goles</strong><span class="etiqueta">Principal</span>
+        <div class="justificacion">💡 ${justVisita}</div>`;
+
+    // AMBOS ANOTAN
+    const recAmbos = document.getElementById('recAmbos');
+    const localPuede = golesLocal >= 1.0 || aL >= UMB_ATAQUE_BUENO;
+    const visitaPuede = golesVisita >= 1.0 || aV >= UMB_ATAQUE_BUENO;
+    const ambosSí = localPuede && visitaPuede;
+    recAmbos.className = `recomendacion ${ambosSí ? 'mas' : 'menos'}`;
+    recAmbos.innerHTML = `🎯 <strong>${ambosSí ? 'SÍ — Ambos anotan' : 'NO — Ambos anotan'}</strong><span class="etiqueta etiqueta-ambos">Recomendado</span>
+        <div class="justificacion">💡 ${ambosSí 
+            ? 'Ambos equipos tienen capacidad ofensiva ajustada según nivel de liga' 
+            : 'Al menos un equipo tiene dificultades ofensivas o enfrenta una defensa fuerte'}</div>`;
+
+    // TOTAL GOLES
+    const recTotal1 = document.getElementById('recTotal1');
+    const recTotal2 = document.getElementById('recTotal2');
+    const lineaTotal = totalGoles >= 2.0 ? 2.5 : 1.5;
+    const dirTotal = totalGoles >= lineaTotal ? 'mas' : 'menos';
+    recTotal1.className = `recomendacion ${dirTotal === 'mas' ? 'mas' : 'menos'}`;
+    recTotal1.innerHTML = `✅ <strong>${dirTotal === 'mas' ? 'MÁS' : 'MENOS'} de ${lineaTotal} goles</strong><span class="etiqueta">Principal</span>
+        <div class="justificacion">💡 Total ajustado: ${totalGoles.toFixed(2)} goles</div>`;
+    recTotal2.className = `recomendacion ${dirTotal === 'mas' ? 'mas' : 'menos'}`;
+    recTotal2.innerHTML = `✅ <strong>${dirTotal === 'mas' ? 'MÁS' : 'MENOS'} de ${dirTotal === 'mas' ? 1.5 : 3.5} goles</strong><span class="etiqueta etiqueta-seguro">Más seguro</span>`;
+
+    // CÓRNERS
+    const recC1 = document.getElementById('recCorners1');
+    const recC2 = document.getElementById('recCorners2');
+    const lineaC = totalCorners >= 9.0 ? 9.5 : 8.5;
+    const dirC = totalCorners >= lineaC ? 'mas' : 'menos';
+    recC1.className = `recomendacion ${dirC === 'mas' ? 'mas' : 'menos'}`;
+    recC1.innerHTML = `✅ <strong>${dirC === 'mas' ? 'MÁS' : 'MENOS'} de ${lineaC} córners</strong><span class="etiqueta">Principal</span>`;
+    recC2.className = `recomendacion ${dirC === 'mas' ? 'mas' : 'menos'}`;
+    recC2.innerHTML = `✅ <strong>${dirC === 'mas' ? 'MÁS' : 'MENOS'} de ${dirC === 'mas' ? 7.5 : 10.5} córners</strong><span class="etiqueta etiqueta-seguro">Más seguro</span>`;
+
+    // TARJETAS
+    const recT1 = document.getElementById('recTarjetas1');
+    const recT2 = document.getElementById('recTarjetas2');
+    const lineaT = totalTarjetas >= 5.0 ? 5.5 : 4.5;
+    const dirT = totalTarjetas >= lineaT ? 'mas' : 'menos';
+    recT1.className = `recomendacion ${dirT === 'mas' ? 'mas' : 'menos'}`;
+    recT1.innerHTML = `✅ <strong>${dirT === 'mas' ? 'MÁS' : 'MENOS'} de ${lineaT} tarjetas</strong><span class="etiqueta">Principal</span>`;
+    recT2.className = `recomendacion ${dirT === 'mas' ? 'mas' : 'menos'}`;
+    recT2.innerHTML = `✅ <strong>${dirT === 'mas' ? 'MÁS' : 'MENOS'} de ${dirT === 'mas' ? 3.5 : 6.5} tarjetas</strong><span class="etiqueta etiqueta-seguro">Más seguro</span>`;
+
+    // FALTAS
+    const recF1 = document.getElementById('recFaltas1');
+    const recF2 = document.getElementById('recFaltas2');
+    const lineaF = totalFaltas >= 11.0 ? 11.5 : 10.5;
+    const dirF = totalFaltas >= lineaF ? 'mas' : 'menos';
+    recF1.className = `recomendacion ${dirF === 'mas' ? 'mas' : 'menos'}`;
+    recF1.innerHTML = `✅ <strong>${dirF === 'mas' ? 'MÁS' : 'MENOS'} de ${lineaF} faltas</strong><span class="etiqueta">Principal</span>`;
+    recF2.className = `recomendacion ${dirF === 'mas' ? 'mas' : 'menos'}`;
+    recF2.innerHTML = `✅ <strong>${dirF === 'mas' ? 'MÁS' : 'MENOS'} de ${dirF === 'mas' ? 9.5 : 12.5} faltas</strong><span class="etiqueta etiqueta-seguro">Más seguro</span>`;
+
+    // MOSTRAR TODO
+    document.getElementById('cajaResultado').classList.add('activo');
+    window.scrollBy({ top: 250, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
